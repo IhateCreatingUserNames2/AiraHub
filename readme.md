@@ -24,6 +24,9 @@ This web interface simplifies the process of working with A2A and MCP protocols,
 - **Status Dashboard**: Monitor the health and status of the AIRA Hub
 - **Heartbeat Management**: Send heartbeats to agents to check their status
 
+
+![image](https://github.com/user-attachments/assets/eda2654d-d77f-41c3-a5ef-232a118a7e34)
+
 ## Installation
 
 ### Prerequisites
