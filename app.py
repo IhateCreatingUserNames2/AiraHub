@@ -140,7 +140,8 @@ def index():
         'active_agents_count': len(active_agents),
         'categories': get_categories(),
         'agent_tags': get_tags('agent'),
-        'skill_tags': get_tags('skill')
+        'skill_tags': get_tags('skill'),
+        'current_year': datetime.now().year  # Add this line
     }
 
     return render_template('index.html', **context)
@@ -350,5 +351,5 @@ def unregister_agent(agent_url):
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8095))
     app.run(host='0.0.0.0', port=port, debug=True)
