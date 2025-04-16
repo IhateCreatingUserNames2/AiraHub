@@ -46,7 +46,12 @@ def get_agents():
     try:
         response = requests.get(f"{AIRA_HUB_URL}/agents")
         if response.status_code == 200:
-            return response.json()
+            agents = response.json()
+            # Ensure each agent has a description
+            for agent in agents:
+                if 'description' not in agent:
+                    agent['description'] = 'No description available'
+            return agents
         else:
             flash(f"Failed to get agents: {response.text}", "error")
             return []
