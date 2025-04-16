@@ -107,7 +107,11 @@
                                 </p>
 
                                 <p class="card-text mb-3">
-                                    {{ agent.description|default('No description available.')|truncate(100) }}
+                                    {% if agent.description %}
+                                        {{ agent.description|truncate(100) }}
+                                    {% else %}
+                                        No description available
+                                    {% endif %}
                                 </p>
 
                                 {% if agent.tags %}
