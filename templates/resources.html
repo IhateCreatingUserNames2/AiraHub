@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}AIRA Hub - Resources{% endblock %}
-
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
@@ -47,3 +45,62 @@
                             <option value="api_endpoint" {% if filter_type == 'api_endpoint' %}selected{% endif %}>API Endpoint</option>
                             <option value="dataset" {% if filter_type == 'dataset' %}selected{% endif %}>Dataset</option>
                             <option value="other" {% if filter_type == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resources List -->
+    <div class="col-md-9">
+        {% if resources %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for resource_item in resources %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-boxes text-primary me-2"></i>
+                                        {{ resource_item.resource.uri }}
+                                    </h5>
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ resource_item.resource.type }}
+                                    </span>
+                                </div>
+                                <p class="card-text text-muted">
+                                    {{ resource_item.resource.description }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        From Agent: {{ resource_item.agent.name }}
+                                    </small>
+                                    <a href="{{ resource_item.agent.url }}" class="btn btn-sm btn-outline-secondary">
+                                        View Agent
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-top-0">
+                                <div class="row">
+                                    <div class="col">
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>
+                                            Updated: {{ resource_item.resource.timestamp|default('N/A') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                No resources found. Try adjusting your filters or search terms.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
