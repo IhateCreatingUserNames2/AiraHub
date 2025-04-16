@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}AIRA Hub - Resources{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h3">
+                        <i class="bi bi-archive text-primary"></i> Resources Directory
+                    </h1>
+                </div>
+                <p class="text-muted">Browse all shared resources across the AIRA network.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Filters -->
+    <div class="col-md-3 mb-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Filter Resources</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('resources_list') }}" method="get">
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Search</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search" name="q" value="{{ filter_query|default('') }}" placeholder="Search...">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Resource Type</label>
+                        <select class="form-select" id="type" name="type" onchange="this.form.submit()">
+                            <option value="">All Types</option>
+                            <option value="mcp_tool" {% if filter_type == 'mcp_tool' %}selected{% endif %}>MCP Tool</option>
+                            <option value="mcp_resource" {% if filter_type == 'mcp_resource' %}selected{% endif %}>MCP Resource</option>
+                            <option value="a2a_skill" {% if filter_type == 'a2a_skill' %}selected{% endif %}>A2A Skill</option>
+                            <option value="api_endpoint" {% if filter_type == 'api_endpoint' %}selected{% endif %}>API Endpoint</option>
+                            <option value="dataset" {% if filter_type == 'dataset' %}selected{% endif %}>Dataset</option>
+                            <option value="other" {% if filter_type == 'other' %}selected{% endif %}>Other</option>

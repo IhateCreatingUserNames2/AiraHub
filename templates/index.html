@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}AIRA Hub - Home{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('agents_list') }}" class="btn btn-primary w-100 p-3">
+                            <i class="bi bi-grid-3x3-gap me-2"></i> View All Agents
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('register_agent') }}" class="btn btn-success w-100 p-3">
+                            <i class="bi bi-plus-circle me-2"></i> Register New Agent
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('resources_list') }}" class="btn btn-info w-100 p-3 text-white">
+                            <i class="bi bi-archive me-2"></i> View All Resources
+                        </a>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ url_for('discover') }}" class="btn btn-secondary w-100 p-3">
+                            <i class="bi bi-search me-2"></i> Discover Agents
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Categories</h5>
+            </div>
+            <div class="card-body">
+                {% if categories %}
+                    <div class="d-flex flex-wrap">
+                        {% for category in categories %}
+                            <a href="{{ url_for('agents_list', category=category) }}" class="badge bg-primary tag-badge text-decoration-none mb-2 me-2 p-2">
+                                <i class="bi bi-tag-fill me-1"></i> {{ category }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No categories found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Agent Tags</h5>
+            </div>
+            <div class="card-body">
+                {% if agent_tags %}
+                    <div class="d-flex flex-wrap">
+                        {% for tag in agent_tags %}
+                            <a href="{{ url_for('agents_list', tag=tag) }}" class="badge bg-primary tag-badge text-decoration-none mb-2 me-2 p-2">
+                                <i class="bi bi-tag-fill me-1"></i> {{ tag }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No agent tags found.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Skill Tags</h5>
+            </div>
+            <div class="card-body">
+                {% if skill_tags %}
+                    <div class="d-flex flex-wrap">
+                        {% for tag in skill_tags %}
+                            <a href="{{ url_for('discover', skill_tags=tag) }}" class="badge bg-secondary skill-badge text-decoration-none mb-2 me-2 p-2">
+                                <i class="bi bi-tag-fill me-1"></i> {{ tag }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No skill tags found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+                <h1 class="display-5 mb-4">
+                    <i class="bi bi-robot text-primary"></i> AIRA Hub Dashboard
+                </h1>
+                <p class="lead">
+                    Welcome to the AIRA Hub WebUI. This interface helps you manage and interact with AI agents
+                    connected to the AIRA network using A2A (Agent-to-Agent) and MCP (Model Context Protocol).
+                </p>
+                <p>
+                    Use this dashboard to discover, register, and monitor agents, as well as manage resources and skills
+                    shared across the AIRA ecosystem.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm stats-card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-grid-3x3-gap stats-icon"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Registered Agents</h6>
+                    <h3 class="mb-0">{{ status.registered_agents|default('N/A') }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm stats-card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-lightning-charge stats-icon"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Active Agents</h6>
+                    <h3 class="mb-0">{{ status.active_agents|default('N/A') }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm stats-card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-archive stats-icon"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Total Resources</h6>
+                    <h3 class="mb-0">{{ status.total_resources|default('N/A') }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm stats-card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="me-3">
+                    <i class="bi bi-tools stats-icon"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted mb-1">Total Skills</h6>
+                    <h3 class="mb-0">{{ status.total_skills|default('N/A') }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <h5 class="mb-0">System Status</h5>
+                <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-light">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-muted">Status</h6>
+                            <p class="mb-0">
+                                <span class="badge {% if status.status == 'healthy' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ status.status|default('Unknown') }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-muted">Version</h6>
+                            <p class="mb-0">{{ status.version|default('Unknown') }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-muted">Uptime</h6>
+                            <p class="mb-0">{{ status.uptime|format_duration|default('Unknown') }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-muted">Registered Agents</h6>
+                            <p class="mb-0">{{ status.registered_agents|default('N/A') }} / Active: {{ status.active_agents|default('N/A') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">

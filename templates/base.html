@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AIRA Hub{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --bg-light: #f8f9fa;
+            --text-dark: #212529;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+        }
+
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+
+        .nav-link:hover {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .agent-card, .resource-card {
+            transition: transform 0.2s;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .agent-card:hover, .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .agent-card .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .resource-card .card-header {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .badge-online {
+            background-color: #198754;
+        }
+
+        .badge-offline {
+            background-color: #dc3545;
+        }
+
+        .badge-degraded {
+            background-color: #fd7e14;
+        }
+
+        .stats-card {
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .stats-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        footer {
+            background-color: var(--text-dark);
+            color: white;
+        }
+
+        .tag-badge {
+            background-color: var(--accent-color);
+            color: white;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .skill-badge {
+            background-color: var(--secondary-color);
+            color: white;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .resource-badge {
+            background-color: #20c997;
+            color: white;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1050;
+            max-width: 350px;
+        }
+
+        /* Custom JSON formatter */
+        pre.json-formatter {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            overflow: auto;
+            max-height: 500px;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+    </style>
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-robot"></i> AIRA Hub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('index') %}active{% endif %}"
+                           href="{{ url_for('index') }}">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('agents_list') %}active{% endif %}"
+                           href="{{ url_for('agents_list') }}">
+                            <i class="bi bi-grid"></i> Agents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('resources_list') %}active{% endif %}"
+                           href="{{ url_for('resources_list') }}">
+                            <i class="bi bi-archive"></i> Resources
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('discover') %}active{% endif %}"
+                           href="{{ url_for('discover') }}">
+                            <i class="bi bi-search"></i> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == url_for('register_agent') %}active{% endif %}"
+                           href="{{ url_for('register_agent') }}">
+                            <i class="bi bi-plus-circle"></i> Register Agent
+                        </a>
+                    </li>
+                </ul>
+                <span class="navbar-text text-white">
+                    <i class="bi bi-cloud"></i> {{ AIRA_HUB_URL|default('https://aira-fl8f.onrender.com') }}
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="container py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 mt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-robot"></i> AIRA Hub WebUI</h5>
+                    <p>An open protocol enabling communication and interoperability between AI agents.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="https://github.com/google/A2A" class="text-white" target="_blank">A2A Protocol (GitHub)</a></li>
+                        <li><a href="https://modelcontextprotocol.io" class="text-white" target="_blank">Model Context Protocol</a></li>
+                        <li><a href="https://google.github.io/A2A/" class="text-white" target="_blank">A2A Documentation</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Resources</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('agents_list') }}" class="text-white">All Agents</a></li>
+                        <li><a href="{{ url_for('resources_list') }}" class="text-white">All Resources</a></li>
+                        <li><a href="{{ url_for('discover') }}" class="text-white">Discovery</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-3 bg-light">
+            <div class="text-center">
+                <p>AIRA Hub WebUI &copy; {% now year %}</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.querySelectorAll('.alert').forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+
+        // Pretty-print JSON in pre.json-formatter elements
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('pre.json-formatter').forEach(function(el) {
+                try {
+                    const content = el.textContent;
+                    const json = JSON.parse(content);
+                    el.textContent = JSON.stringify(json, null, 2);
+                } catch (e) {
+                    console.error("Failed to format JSON:", e);
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}AIRA Hub - Agent Details: {{ agent.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('agents_list') }}">Agents</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ agent.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h3">
+                        <i class="bi bi-robot text-primary"></i> {{ agent.name }}
+                        <span class="badge badge-{{ agent.status|default('offline') }} ms-2">
+                            {{ agent.status|default('offline')|capitalize }}
+                        </span>
+                    </h1>
+                    <div>
+                        <button class="btn btn-primary me-2" 
+                                onclick="sendHeartbeat('{{ agent.url }}')">
+                            <i class="bi bi-heart-pulse"></i> Send Heartbeat
+                        </button>
+                        
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#unregisterModal">
+                            <i class="bi bi-trash"></i> Unregister
+                        </button>
+                    </div>
+                </div>
+                
+                <p class="text-muted mb-0">
+                    <i class="bi bi-link-45deg"></i> <a href="{{ agent.url }}" target="_blank">{{ agent.url }}</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Agent Info -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Agent Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Name</th>
+                            <td>{{ agent.name }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Version</th>
+                            <td>{{ agent.version|default('N/A') }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Status</th>
+                            <td>
+                                <span class="badge badge-{{ agent.status|default('offline') }}">
+                                    {{ agent.status|default('offline')|capitalize }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Last Seen</th>
+                            <td>{{ agent.last_seen|format_timestamp|default('Never') }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Created At</th>
+                            <td>{{ agent.created_at|format_timestamp|default('Unknown') }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Category</th>
+                            <td>{{ agent.category|default('Uncategorized') }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Provider</th>
+                            <td>
+                                {% if agent.provider %}
+                                    {% if agent.provider.url %}
+                                        <a href="{{ agent.provider.url }}" target="_blank">
+                                            {{ agent.provider.organization|default('Unknown') }}
+                                        </a>
+                                    {% else %}
+                                        {{ agent.provider.organization|default('Unknown') }}
+                                    {% endif %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if agent.description %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Description</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ agent.description }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if agent.tags and agent.tags|length > 0 %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Tags</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap">
+                    {% for tag in agent.tags %}
+                        <span class="badge tag-badge p-2 me-2 mb-2">
+                            <i class="bi bi-tag-fill me-1"></i> {{ tag }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if agent.aira_capabilities and agent.aira_capabilities|length > 0 %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">AIRA Capabilities</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap">
+                    {% for capability in agent.aira_capabilities %}
+                        <span class="badge bg-info text-white p-2 me-2 mb-2">
+                            <i class="bi bi-lightning-charge me-1"></i> {{ capability }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if agent.auth %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Authentication</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th scope="row">Type</th>
+                            <td>{{ agent.auth.type|default('none') }}</td>
+                        </tr>
+                        {% if agent.auth.scheme %}
+                        <tr>
+                            <th scope="row">Scheme</th>
+                            <td>{{ agent.auth.scheme }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if agent.auth.parameter_name %}
+                        <tr>
+                            <th scope="row">Parameter</th>
+                            <td>{{ agent.auth.parameter_name }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if agent.auth.location %}
+                        <tr>
+                            <th scope="row">Location</th>
+                            <td>{{ agent.auth.location }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Tabs for Skills and Resources -->
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <ul class="nav nav-tabs card-header-tabs" id="agentDetailsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-dark" id="skills-tab" data-bs-toggle="tab" data-bs-target="#skills" type="button" role="tab" aria-controls="skills" aria-selected="true">
+                            <i class="bi bi-tools"></i> Skills ({{ agent.skills|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-dark" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab" aria-controls="resources" aria-selected="false">
+                            <i class="bi bi-archive"></i> Resources ({{ agent.shared_resources|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-dark" id="json-tab" data-bs-toggle="tab" data-bs-target="#json" type="button" role="tab" aria-controls="json" aria-selected="false">
+                            <i class="bi bi-code-slash"></i> Raw JSON
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card-body">
+                <div class="tab-content" id="agentDetailsTabsContent">
+                    <!-- Skills Tab -->
+                    <div class="tab-pane fade show active" id="skills" role="tabpanel" aria-labelledby="skills-tab">
+                        {% if agent.skills and agent.skills|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Tags</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for skill in agent.skills %}
+                                            <tr>
+                                                <td>{{ skill.id }}</td>
+                                                <td>{{ skill.name }}</td>
+                                                <td>{{ skill.description|default('No description') }}</td>
+                                                <td>
+                                                    {% if skill.tags %}
+                                                        {% for tag in skill.tags %}
+                                                            <span class="badge skill-badge">{{ tag }}</span>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <span class="text-muted">No tags</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> This agent has no registered skills.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Resources Tab -->
+                    <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
+                        {% if agent.shared_resources and agent.shared_resources|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>URI</th>
+                                            <th>Description</th>
+                                            <th>Type</th>
+                                            <th>Version</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for resource in agent.shared_resources %}
+                                            <tr>
+                                                <td>{{ resource.uri }}</td>
+                                                <td>{{ resource.description }}</td>
+                                                <td>
+                                                    <span class="badge resource-badge">{{ resource.type }}</span>
+                                                </td>
+                                                <td>{{ resource.version|default('1.0.0') }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> This agent has no shared resources.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Raw JSON Tab -->
+                    <div class="tab-pane fade" id="json" role="tabpanel" aria-labelledby="json-tab">
+                        <pre class="json-formatter">{{ agent|tojson }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unregister Modal -->
+<div class="modal fade" id="unregisterModal" tabindex="-1" aria-labelledby="unregisterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="unregisterModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Unregister Agent
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to unregister <strong>{{ agent.name }}</strong>?</p>
+                <p class="text-danger">This action cannot be undone. The agent will be removed from the AIRA Hub.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('unregister_agent', agent_url=agent.url) }}" method="post">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Unregister
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function sendHeartbeat(agentUrl) {
+        fetch(`{{ url_for('send_heartbeat', agent_url='') }}${encodeURIComponent(agentUrl)}`, {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Show success message
+                const flashDiv = document.createElement('div');
+                flashDiv.className = 'alert alert-success alert-dismissible fade show';
+                flashDiv.innerHTML = `Heartbeat sent successfully. <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+                document.querySelector('.flash-messages').appendChild(flashDiv);
+                
+                // Refresh the page after 2 seconds
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                // Show error message
+                const flashDiv = document.createElement('div');
+                flashDiv.className = 'alert alert-danger alert-dismissible fade show';
+                flashDiv.innerHTML = `Failed to send heartbeat: ${data.message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+                document.querySelector('.flash-messages').appendChild(flashDiv);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Show error message
+            const flashDiv = document.createElement('div');
+            flashDiv.className = 'alert alert-danger alert-dismissible fade show';
+            flashDiv.innerHTML = `Error sending heartbeat: ${error.message} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+            document.querySelector('.flash-messages').appendChild(flashDiv);
+        });
+    }
+</script>
+{% endblock %}

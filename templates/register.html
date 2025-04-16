@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+
+{% block title %}AIRA Hub - Register Agent{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h3">
+                        <i class="bi bi-plus-circle text-primary"></i> Register Agent
+                    </h1>
+                </div>
+                <p class="text-muted">Register a new agent with the AIRA Hub to make it discoverable by other agents.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Agent Registration Form</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('register_agent') }}" method="post">
+                    <!-- Basic Information -->
+                    <div class="mb-4">
+                        <h5>Basic Information</h5>
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <label for="url" class="form-label">Agent URL<span class="text-danger">*</span></label>
+                            <input type="url" class="form-control" id="url" name="url" required 
+                                   placeholder="https://myagent.example.com">
+                            <div class="form-text">The URL where your agent is accessible</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required 
+                                   placeholder="Agent Name">
+                            <div class="form-text">A human-readable name for your agent</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Agent description..."></textarea>
+                            <div class="form-text">A brief description of what your agent does</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="version" class="form-label">Version</label>
+                            <input type="text" class="form-control" id="version" name="version" 
+                                   placeholder="1.0.0">
+                            <div class="form-text">The version of your agent (default: 1.0.0)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Select Category</option>
+                                {% for category in categories %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                {% endfor %}
+                                <option value="other">Other</option>
+                            </select>
+                            <div class="form-text">The category that best describes your agent</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tags" class="form-label">Tags</label>
+                            <input type="text" class="form-control" id="tags" name="tags" 
+                                   placeholder="weather, finance, translator">
+                            <div class="form-text">Comma-separated tags for your agent</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Provider Information -->
+                    <div class="mb-4">
+                        <h5>Provider Information</h5>
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <label for="provider_organization" class="form-label">Provider Organization</label>
+                            <input type="text" class="form-control" id="provider_organization" name="provider_organization" 
+                                   placeholder="Your Organization">
+                            <div class="form-text">The name of the organization providing this agent</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="provider_url" class="form-label">Provider URL</label>
+                            <input type="url" class="form-control" id="provider_url" name="provider_url" 
+                                   placeholder="https://organization.example.com">
+                            <div class="form-text">The URL of the provider organization</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Capabilities -->
+                    <div class="mb-4">
+                        <h5>AIRA Capabilities</h5>
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="a2a" id="cap_a2a" name="aira_capabilities" checked>
+                                <label class="form-check-label" for="cap_a2a">
+                                    A2A Protocol
+                                </label>
+                                <div class="form-text">Agent-to-Agent Protocol support</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="mcp" id="cap_mcp" name="aira_capabilities">
+                                <label class="form-check-label" for="cap_mcp">
+                                    MCP Protocol
+                                </label>
+                                <div class="form-text">Model Context Protocol support</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="streaming" id="cap_streaming" name="aira_capabilities">
+                                <label class="form-check-label" for="cap_streaming">
+                                    Streaming Support
+                                </label>
+                                <div class="form-text">Support for streaming responses</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="push_notifications" id="cap_push" name="aira_capabilities">
+                                <label class="form-check-label" for="cap_push">
+                                    Push Notifications
+                                </label>
+                                <div class="form-text">Support for push notifications</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Authentication -->
+                    <div class="mb-4">
+                        <h5>Authentication</h5>
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <label for="auth_type" class="form-label">Authentication Type</label>
+                            <select class="form-select" id="auth_type" name="auth_type">
+                                <option value="none">None</option>
+                                <option value="apiKey">API Key</option>
+                                <option value="oauth2">OAuth 2.0</option>
+                                <option value="basic">Basic Auth</option>
+                                <option value="bearer">Bearer Token</option>
+                            </select>
+                        </div>
+                        
+                        <div id="auth_details" class="d-none">
+                            <div class="mb-3">
+                                <label for="auth_json" class="form-label">Authentication Details (JSON)</label>
+                                <textarea class="form-control" id="auth_json" name="auth" rows="4" 
+                                          placeholder='{"type": "apiKey", "in": "header", "name": "X-API-Key"}'></textarea>
+                                <div class="form-text">Enter authentication details in JSON format</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Skills and Resources (Advanced) -->
+                    <div class="mb-4">
+                        <h5>Skills and Resources (Advanced)</h5>
+                        <hr>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> These fields are for advanced users. You can leave them empty if you're not sure.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="skills_json" class="form-label">Skills (JSON Array)</label>
+                            <textarea class="form-control" id="skills_json" name="skills" rows="5" 
+                                      placeholder='[{"id": "weather-lookup", "name": "Weather Lookup", "description": "Lookup weather information", "tags": ["weather", "lookup"]}]'></textarea>
+                            <div class="form-text">JSON array of skills provided by your agent</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="resources_json" class="form-label">Shared Resources (JSON Array)</label>
+                            <textarea class="form-control" id="resources_json" name="shared_resources" rows="5" 
+                                      placeholder='[{"uri": "mcp://tool/get-weather", "description": "Weather forecast tool", "type": "mcp_tool", "version": "1.0.0"}]'></textarea>
+                            <div class="form-text">JSON array of resources shared by your agent</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle"></i> Register Agent
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5">
+        <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Registration Help</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6><i class="bi bi-info-circle text-primary"></i> What is Agent Registration?</h6>
+                    <p>
+                        Agent registration makes your AI agent discoverable to other agents in the AIRA network. 
+                        This allows for seamless communication and interoperability between agents using the A2A 
+                        (Agent-to-Agent) protocol and/or the MCP (Model Context Protocol).
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6><i class="bi bi-link-45deg text-primary"></i> Agent URL</h6>
+                    <p>
+                        This is the base URL where your agent is accessible. For A2A protocol, your agent 
+                        should handle POST requests to the <code>/a2a</code> endpoint. For MCP, it should 
+                        implement the MCP endpoints.
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6><i class="bi bi-tools text-primary"></i> Skills</h6>
+                    <p>
+                        Skills define the capabilities your agent provides to other agents. Each skill has:
+                    </p>
+                    <ul>
+                        <li><strong>ID:</strong> A unique identifier for the skill</li>
+                        <li><strong>Name:</strong> A human-readable name</li>
+                        <li><strong>Description:</strong> What the skill does</li>
+                        <li><strong>Tags:</strong> Keywords to make the skill discoverable</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6><i class="bi bi-archive text-primary"></i> Resources</h6>
+                    <p>
+                        Resources are data or functionality shared by your agent. Each resource has:
+                    </p>
+                    <ul>
+                        <li><strong>URI:</strong> A unique identifier for the resource</li>
+                        <li><strong>Description:</strong> What the resource provides</li>
+                        <li><strong>Type:</strong> The type of resource (e.g., MCP tool, A2A skill)</li>
+                        <li><strong>Version:</strong> The version of the resource</li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h6><i class="bi bi-shield-lock text-primary"></i> Authentication</h6>
+                    <p>
+                        If your agent requires authentication, you can specify the authentication method:
+                    </p>
+                    <ul>
+                        <li><strong>API Key:</strong> An API key-based authentication</li>
+                        <li><strong>OAuth 2.0:</strong> OAuth 2.0 authentication flow</li>
+                        <li><strong>Basic Auth:</strong> Username/password authentication</li>
+                        <li><strong>Bearer Token:</strong> Bearer token authentication</li>
+                    </ul>
+                    <p>
+                        Authentication details should be provided in JSON format. For example, for an API key:
+                    </p>
+                    <pre><code>{
+  "type": "apiKey",
+  "in": "header",
+  "name": "X-API-Key"
+}</code></pre>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> <strong>Important:</strong>
+                    <p>
+                        Agents must implement the A2A protocol (or MCP) to be fully functional within the AIRA network.
+                        Make sure your agent properly handles the protocol requests and responses.
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <a href="https://github.com/google/A2A" target="_blank" class="btn btn-outline-primary mb-2">
+                        <i class="bi bi-book"></i> A2A Protocol Documentation
+                    </a>
+                    <br>
+                    <a href="https://modelcontextprotocol.io" target="_blank" class="btn btn-outline-primary">
+                        <i class="bi bi-book"></i> MCP Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Convert tags input to array
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const tagsInput = document.getElementById('tags');
+            if (tagsInput.value) {
+                const tagsArray = tagsInput.value.split(',').map(tag => tag.trim());
+                const tagsHidden = document.createElement('input');
+                tagsHidden.type = 'hidden';
+                tagsHidden.name = 'tags';
+                tagsHidden.value = JSON.stringify(tagsArray);
+                form.appendChild(tagsHidden);
+            }
+        });
+        
+        // Toggle auth details based on selected auth type
+        const authType = document.getElementById('auth_type');
+        const authDetails = document.getElementById('auth_details');
+        
+        authType.addEventListener('change', function() {
+            if (this.value === 'none') {
+                authDetails.classList.add('d-none');
+                document.getElementById('auth_json').value = '{}';
+            } else {
+                authDetails.classList.remove('d-none');
+                // Set default JSON template based on selected auth type
+                let template = {};
+                switch(this.value) {
+                    case 'apiKey':
+                        template = {
+                            "type": "apiKey",
+                            "in": "header",
+                            "name": "X-API-Key"
+                        };
+                        break;
+                    case 'oauth2':
+                        template = {
+                            "type": "oauth2",
+                            "flows": {
+                                "implicit": {
+                                    "authorizationUrl": "https://example.com/oauth/authorize"
+                                }
+                            }
+                        };
+                        break;
+                    case 'basic':
+                        template = {
+                            "type": "basic"
+                        };
+                        break;
+                    case 'bearer':
+                        template = {
+                            "type": "bearer"
+                        };
+                        break;
+                }
+                document.getElementById('auth_json').value = JSON.stringify(template, null, 2);
+            }
+        });
+        
+        // Add JSON validation for the advanced fields
+        function validateJson(input) {
+            try {
+                if (input.value.trim() !== '') {
+                    JSON.parse(input.value);
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                } else {
+                    input.classList.remove('is-invalid');
+                    input.classList.remove('is-valid');
+                }
+            } catch (e) {
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+                
+                // Add validation message if not exists
+                let nextElement = input.nextElementSibling;
+                if (!nextElement || !nextElement.classList.contains('invalid-feedback')) {
+                    const invalidFeedback = document.createElement('div');
+                    invalidFeedback.className = 'invalid-feedback';
+                    invalidFeedback.textContent = 'Invalid JSON format';
+                    input.parentNode.insertBefore(invalidFeedback, input.nextSibling);
+                }
+            }
+        }
+        
+        document.getElementById('skills_json').addEventListener('blur', function() {
+            validateJson(this);
+        });
+        
+        document.getElementById('resources_json').addEventListener('blur', function() {
+            validateJson(this);
+        });
+        
+        document.getElementById('auth_json').addEventListener('blur', function() {
+            validateJson(this);
+        });
+    });
+</script>
+{% endblock %}

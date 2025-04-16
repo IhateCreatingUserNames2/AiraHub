@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}AIRA Hub - Agents{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h3">
+                        <i class="bi bi-grid-3x3-gap text-primary"></i> Agents Directory
+                    </h1>
+                    <a href="{{ url_for('register_agent') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Register New Agent
+                    </a>
+                </div>
+                <p class="text-muted">Browse all registered agents in the AIRA network.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Filters Sidebar -->
+    <div class="col-md-3 mb-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Filter Agents</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('agents_list') }}" method="get">
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Search</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search" name="q" value="{{ filter_query|default('') }}" placeholder="Search...">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}" {% if filter_category == category %}selected{% endif %}>
+                                    {{ category }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tag" class="form-label">Tag</label>
+                        <select class="form-select" id="tag" name="tag" onchange="this.form.submit()">
+                            <option value="">All Tags</option>
+                            {% for tag in tags %}
+                                <option value="{{ tag }}" {% if filter_tag == tag %}selected{% endif %}>
+                                    {{ tag }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status" onchange="this.form.submit()">
+                            <option value="">All Status</option>
+                            <option value="online" {% if filter_status == 'online' %}selected{% endif %}>Online</option>
+                            <option value="offline" {% if filter_status == 'offline' %}selected{% endif %}>Offline</option>
+                            <option value="degraded" {% if filter_status == 'degraded' %}selected{% endif %}>Degraded</option>
+                        </select>
+                    </div>
+
+                    {% if filter_category or filter_tag or filter_status or filter_query %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('agents_list') }}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-x-circle"></i> Clear Filters
+                            </a>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agents List -->
+    <div class="col-md-9">
+        <div class="row">
+            {% if agents %}
+                {% for agent in agents %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card agent-card shadow-sm h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-truncate" title="{{ agent.name }}">
+                                    {{ agent.name }}
+                                </h5>
+                                <span class="badge badge-{{ agent.status|default('offline') }}">
+                                    {{ agent.status|default('offline')|capitalize }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted mb-2 small">
+                                    <i class="bi bi-link-45deg"></i> {{ agent.url }}
+                                </p>
+
+                                <p class="card-text mb-3">
+                                    {{ agent.description|default('No description available.')|truncate(100) }}
+                                </p>
+
+                                {% if agent.tags %}
+                                    <div class="mb-2">
+                                        {% for tag in agent.tags %}
+                                            <span class="badge tag-badge">{{ tag }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-light text-dark">
+                                        <i class="bi bi-tools"></i> {{ agent.skills|length }} skills
+                                    </span>
+
+                                    <span class="badge bg-light text-dark">
+                                        <i class="bi bi-archive"></i> {{ agent.shared_resources|length }} resources
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{{ url_for('agent_details', agent_url=agent.url) }}" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-info-circle"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> No agents found matching your criteria.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

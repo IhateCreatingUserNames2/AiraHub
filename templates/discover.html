@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}AIRA Hub - Discover Agents{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h3">
+                        <i class="bi bi-search text-primary"></i> Discover Agents
+                    </h1>
+                </div>
+                <p class="text-muted">Find agents based on specific capabilities, skills, or resources.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Discovery Form -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Discovery Criteria</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('discover') }}" method="post">
+                    <div class="mb-3">
+                        <label for="skill_id" class="form-label">Skill ID</label>
+                        <input type="text" class="form-control" id="skill_id" name="skill_id" 
+                               value="{{ query_params.skill_id|default('') }}" 
+                               placeholder="Enter a specific skill ID">
+                        <div class="form-text">Find agents with a specific skill ID</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="skill_tags" class="form-label">Skill Tags</label>
+                        <select class="form-select" id="skill_tags" name="skill_tags" multiple>
+                            {% for tag in skill_tags %}
+                                <option value="{{ tag }}" 
+                                    {% if query_params.skill_tags and tag in query_params.skill_tags %}selected{% endif %}>
+                                    {{ tag }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Find agents with skills matching these tags</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="resource_type" class="form-label">Resource Type</label>
+                        <select class="form-select" id="resource_type" name="resource_type">
+                            <option value="">Any Resource Type</option>
+                            <option value="mcp_tool" {% if query_params.resource_type == 'mcp_tool' %}selected{% endif %}>MCP Tool</option>
+                            <option value="mcp_resource" {% if query_params.resource_type == 'mcp_resource' %}selected{% endif %}>MCP Resource</option>
+                            <option value="a2a_skill" {% if query_params.resource_type == 'a2a_skill' %}selected{% endif %}>A2A Skill</option>
+                            <option value="api_endpoint" {% if query_params.resource_type == 'api_endpoint' %}selected{% endif %}>API Endpoint</option>
+                            <option value="dataset" {% if query_params.resource_type == 'dataset' %}selected{% endif %}>Dataset</option>
+                            <option value="other" {% if query_params.resource_type == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                        <div class="form-text">Find agents providing resources of this type</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="agent_tags" class="form-label">Agent Tags</label>
+                        <select class="form-select" id="agent_tags" name="agent_tags" multiple>
+                            {% for tag in agent_tags %}
+                                <option value="{{ tag }}" 
+                                    {% if query_params.agent_tags and tag in query_params.agent_tags %}selected{% endif %}>
+                                    {{ tag }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Find agents with these tags</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="">Any Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}" 
+                                    {% if query_params.category == category %}selected{% endif %}>
+                                    {{ category }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Find agents in this category</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Any Status</option>
+                            <option value="online" {% if query_params.status == 'online' %}selected{% endif %}>Online</option>
+                            <option value="offline" {% if query_params.status == 'offline' %}selected{% endif %}>Offline</option>
+                            <option value="degraded" {% if query_params.status == 'degraded' %}selected{% endif %}>Degraded</option>
+                        </select>
+                        <div class="form-text">Find agents with this status</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Discover Agents
+                        </button>
+                    </div>
+                    
+                    {% if query_params %}
+                        <div class="mb-3">
+                            <a href="{{ url_for('discover') }}" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-x-circle"></i> Clear All Criteria
+                            </a>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Discovery Results -->
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Discovery Results</h5>
+            </div>
+            <div class="card-body">
+                {% if results %}
+                    <div class="alert alert-success mb-3">
+                        <i class="bi bi-info-circle"></i> Found {{ results.total }} agent(s) matching your criteria.
+                    </div>
+                    
+                    {% if results.agents %}
+                        <div class="row">
+                            {% for agent in results.agents %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="card agent-card shadow-sm h-100">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0 text-truncate" title="{{ agent.name }}">
+                                                {{ agent.name }}
+                                            </h5>
+                                            <span class="badge badge-{{ agent.status|default('offline') }}">
+                                                {{ agent.status|default('offline')|capitalize }}
+                                            </span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted mb-2 small">
+                                                <i class="bi bi-link-45deg"></i> {{ agent.url }}
+                                            </p>
+                                            
+                                            <p class="card-text mb-3">
+                                                {{ agent.description|default('No description available.')|truncate(100) }}
+                                            </p>
+                                            
+                                            {% if agent.tags %}
+                                                <div class="mb-2">
+                                                    {% for tag in agent.tags %}
+                                                        <span class="badge tag-badge">{{ tag }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="bi bi-tools"></i> {{ agent.skills|length }} skills
+                                                </span>
+                                                
+                                                <span class="badge bg-light text-dark">
+                                                    <i class="bi bi-archive"></i> {{ agent.shared_resources|length }} resources
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="{{ url_for('agent_details', agent_url=agent.url) }}" class="btn btn-primary btn-sm w-100">
+                                                <i class="bi bi-info-circle"></i> View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if results.offset > 0 or results.offset + results.limit < results.total %}
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                {% if results.offset > 0 %}
+                                    <form action="{{ url_for('discover') }}" method="post">
+                                        <!-- Hidden fields to maintain state -->
+                                        {% for key, value in query_params.items() %}
+                                            {% if key != 'offset' and key != 'limit' %}
+                                                {% if value is iterable and value is not string %}
+                                                    {% for item in value %}
+                                                        <input type="hidden" name="{{ key }}" value="{{ item }}">
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <input type="hidden" name="offset" value="{{ results.offset - results.limit }}">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="bi bi-arrow-left"></i> Previous
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <div></div>
+                                {% endif %}
+                                
+                                {% if results.offset + results.limit < results.total %}
+                                    <form action="{{ url_for('discover') }}" method="post">
+                                        <!-- Hidden fields to maintain state -->
+                                        {% for key, value in query_params.items() %}
+                                            {% if key != 'offset' and key != 'limit' %}
+                                                {% if value is iterable and value is not string %}
+                                                    {% for item in value %}
+                                                        <input type="hidden" name="{{ key }}" value="{{ item }}">
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <input type="hidden" name="offset" value="{{ results.offset + results.limit }}">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            Next <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <div></div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No agents match your criteria.
+                        </div>
+                    {% endif %}
+                {% elif query_params %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> The search request failed. Please try different criteria.
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Use the form to discover agents matching specific criteria.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add select2 for multiple select boxes if needed
+    // This would require including select2 in your project
+    /*
+    document.addEventListener('DOMContentLoaded', function() {
+        $('#skill_tags').select2({
+            placeholder: 'Select skill tags',
+            allowClear: true
+        });
+        
+        $('#agent_tags').select2({
+            placeholder: 'Select agent tags',
+            allowClear: true
+        });
+    });
+    */
+</script>
+{% endblock %}
